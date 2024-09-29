@@ -1,0 +1,43 @@
+image:
+  debug: true
+
+# Kafka Broker Configuration
+replicaCount: 3  # Number of Kafka brokers
+
+# Node Tolerations (Optional)
+tolerations:
+  - key: "node-role.kubernetes.io/control-plane"
+    operator: "Equal"
+    value: ""
+    effect: "NoSchedule"
+
+# External Access Configuration
+externalAccess:
+  enabled: false
+  autoDiscovery:
+    enabled: true
+
+# KRaft Configuration (Ensure it's disabled if using ZooKeeper)
+kraft:
+  enabled: false
+
+# Extra Environment Variables
+extraEnvVars:
+  - name: KAFKA_ENABLE_KRAFT
+    value: "false"
+  - name: KAFKA_CFG_DELETE_TOPIC_ENABLE
+    value: "true"
+  - name: KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE
+    value: "true"
+
+# ZooKeeper Configuration
+zookeeper:
+  enabled: true
+  replicaCount: 3  # Number of ZooKeeper nodes
+  persistence:
+    enabled: true
+    size: 2Gi  # Persistent storage size for ZooKeeper
+
+# Controller Configuration
+controller:
+  replicaCount: 0  # Set to 0 when using ZooKeeper

@@ -1,0 +1,126 @@
+{{/*apiVersion: storage.k8s.io/v1*/}}
+{{/*kind: StorageClass*/}}
+{{/*metadata:*/}}
+{{/*  name: "data-kafka-staging-zookeeper-0"*/}}
+{{/*provisioner: ebs.csi.aws.com*/}}
+{{/*volumeBindingMode: WaitForFirstConsumer*/}}
+{{/*---*/}}
+{{/*apiVersion: v1*/}}
+{{/*kind: PersistentVolumeClaim*/}}
+{{/*metadata:*/}}
+{{/*  name: "data-kafka-staging-zookeeper-0"*/}}
+{{/*spec:*/}}
+{{/*  accessModes:*/}}
+{{/*    - ReadWriteOnce*/}}
+{{/*  storageClassName: "data-kafka-staging-zookeeper-0"*/}}
+{{/*  resources:*/}}
+{{/*    requests:*/}}
+{{/*      storage: 10Gi*/}}
+{{/*---*/}}
+{{/*apiVersion: storage.k8s.io/v1*/}}
+{{/*kind: StorageClass*/}}
+{{/*metadata:*/}}
+{{/*  name: "data-kafka-staging-broker-0"*/}}
+{{/*provisioner: ebs.csi.aws.com*/}}
+{{/*volumeBindingMode: WaitForFirstConsumer*/}}
+{{/*---*/}}
+{{/*apiVersion: v1*/}}
+{{/*kind: PersistentVolumeClaim*/}}
+{{/*metadata:*/}}
+{{/*  name: "data-kafka-staging-broker-0"*/}}
+{{/*spec:*/}}
+{{/*  accessModes:*/}}
+{{/*    - ReadWriteOnce*/}}
+{{/*  storageClassName: "data-kafka-staging-broker-0"*/}}
+{{/*  resources:*/}}
+{{/*    requests:*/}}
+{{/*      storage: 10Gi*/}}
+{{/*## Second Replica*/}}
+{{/*---*/}}
+{{/*apiVersion: storage.k8s.io/v1*/}}
+{{/*kind: StorageClass*/}}
+{{/*metadata:*/}}
+{{/*  name: "data-kafka-staging-zookeeper-1"*/}}
+{{/*provisioner: ebs.csi.aws.com*/}}
+{{/*volumeBindingMode: WaitForFirstConsumer*/}}
+{{/*---*/}}
+{{/*apiVersion: v1*/}}
+{{/*kind: PersistentVolumeClaim*/}}
+{{/*metadata:*/}}
+{{/*  name: "data-kafka-staging-zookeeper-1"*/}}
+{{/*spec:*/}}
+{{/*  accessModes:*/}}
+{{/*    - ReadWriteOnce*/}}
+{{/*  storageClassName: "data-kafka-staging-zookeeper-1"*/}}
+{{/*  resources:*/}}
+{{/*    requests:*/}}
+{{/*      storage: 10Gi*/}}
+{{/*---*/}}
+{{/*apiVersion: storage.k8s.io/v1*/}}
+{{/*kind: StorageClass*/}}
+{{/*metadata:*/}}
+{{/*  name: "data-kafka-staging-broker-1"*/}}
+{{/*provisioner: ebs.csi.aws.com*/}}
+{{/*volumeBindingMode: WaitForFirstConsumer*/}}
+{{/*---*/}}
+{{/*apiVersion: v1*/}}
+{{/*kind: PersistentVolumeClaim*/}}
+{{/*metadata:*/}}
+{{/*  name: "data-kafka-staging-broker-1"*/}}
+{{/*spec:*/}}
+{{/*  accessModes:*/}}
+{{/*    - ReadWriteOnce*/}}
+{{/*  storageClassName: "data-kafka-staging-broker-1"*/}}
+{{/*  resources:*/}}
+{{/*    requests:*/}}
+{{/*      storage: 10Gi*/}}
+{{/*---*/}}
+
+{{- $prefix := include "kafka.name" .}}
+{{- $zookeeper_prefix := include "kafka.zookeeper.fullname" .}}
+{{- $broker_length := .Values.broker.replicaCount | int }}
+{{- $broker_persistence_size := .Values.broker.persistence.size | quote }}
+{{- $zookeeper_length := .Values.zookeeper.replicaCount | int }}
+{{- $zookeeper_persistence_size := .Values.broker.persistence.size | quote }}
+{{- range $i := until $broker_length }}
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: data-{{ $prefix }}-broker-{{ $i }}
+provisioner: ebs.csi.aws.com
+volumeBindingMode: WaitForFirstConsumer
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: data-{{ $prefix }}-broker-{{ $i }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: data-{{ $prefix }}-broker-{{ $i }}
+  resources:
+    requests:
+      storage: {{ $broker_persistence_size }}
+---
+{{- end }}
+{{- range $i := until $zookeeper_length }}
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: data-{{ $zookeeper_prefix }}-{{ $i }}
+provisioner: ebs.csi.aws.com
+volumeBindingMode: WaitForFirstConsumer
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: data-{{ $zookeeper_prefix }}-{{ $i }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: data-{{ $zookeeper_prefix }}-{{ $i }}
+  resources:
+    requests:
+      storage: {{ $zookeeper_persistence_size }}
+---
+{{- end }}
